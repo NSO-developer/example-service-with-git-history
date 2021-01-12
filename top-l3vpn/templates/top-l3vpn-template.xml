@@ -1,0 +1,18 @@
+<config-template xmlns="http://tail-f.com/ns/config/1.0">
+
+    <vpn xmlns="http://com/example/l3vpn">
+      <l3vpn>
+        <name>{/name}</name>
+        <route-distinguisher>{/route-distinguisher}</route-distinguisher>
+        <endpoint>
+          <id>{/endpoint}</id>
+          <ce-device>{ce-device}</ce-device>
+          <ce-interface>{ce-interface}</ce-interface>
+          <ip-network>{ip-network}</ip-network>
+          <bandwidth>{bandwidth}</bandwidth>
+          <as-number>{as-number}</as-number>
+        </endpoint>
+      </l3vpn>
+    </vpn>
+
+</config-template>

@@ -1,0 +1,157 @@
+module top-l3vpn {
+
+  namespace "http://example.com/top-l3vpn";
+  prefix top-l3vpn;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import tailf-common {
+    prefix tailf;
+  }
+  import tailf-ncs {
+    prefix ncs;
+  }
+
+  description
+    "Example service that creates restore points";
+
+  revision 2020-08-08 {
+    description
+      "Initial revision.";
+  }
+
+  grouping l3vpn-group {
+
+      leaf route-distinguisher {
+        description "Route distinguisher/target identifier unique for the
+        VPN";
+        mandatory true;
+        type uint32;
+      }
+
+      list endpoint {
+        key "id";
+        leaf id{
+          tailf:info "Endpoint identifier";
+          type string;
+        }
+        leaf ce-device {
+          mandatory true;
+          type leafref {
+            path "/ncs:devices/ncs:device/ncs:name";
+          }
+        }
+
+        leaf ce-interface {
+          mandatory true;
+          type string;
+        }
+
+        leaf ip-network {
+          // the private IP network
+          mandatory true;
+          type inet:ip-prefix;
+        }
+        leaf bandwidth {
+          tailf:info "Bandwidth in bps";
+          mandatory true;
+          type uint32;
+        }
+        leaf as-number {
+          tailf:info "CE Router as-number";
+          type uint32;
+        }
+      }
+  }
+
+  list top-l3vpn {
+    description "This is an RFS skeleton service";
+
+    key name;
+    leaf name {
+      tailf:info "Unique service id";
+      tailf:cli-allow-range;
+      type string;
+    }
+
+    container restore-points {
+        tailf:callpoint git-restore-points;
+        config false;
+        list restore-point {
+            key commit;
+            leaf commit {
+                type string;
+            }
+
+            leaf time {
+                type string;
+            }
+
+            tailf:action restore {
+                tailf:actionpoint restore-from-git-action;
+                input {
+
+                }
+                output {
+                  leaf result {
+                    type string;
+                  }
+                }
+            }
+            tailf:action show {
+                tailf:actionpoint show-from-git-action;
+                input {
+
+                }
+                output {
+                  leaf result {
+                    type string;
+                  }
+                }
+            }
+        }
+    }
+
+    uses ncs:service-data;
+    ncs:servicepoint top-l3vpn-servicepoint;
+
+    uses l3vpn-group;
+  }
+
+  container git {
+        uses ncs:service-data;
+        ncs:servicepoint git-servicepoint;
+        presence "Enable git";
+
+        leaf repository-path {
+            type string;
+            tailf:info "Initialize a GIT repository here. Path needs to exists";
+        }
+  }
+
+  list l3vpn-restore-points {
+      description "L3VPN Service Restore Points";
+
+      key name;
+      leaf name {
+        tailf:info "Unique service id";
+        tailf:cli-allow-range;
+        type string;
+      }
+      uses l3vpn-group;
+
+      tailf:action save {
+          tailf:actionpoint save-action;
+          input {
+
+          }
+          output {
+            leaf result {
+              type string;
+            }
+          }
+      }
+
+  }
+}
